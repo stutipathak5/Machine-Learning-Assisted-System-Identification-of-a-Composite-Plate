@@ -129,7 +129,7 @@ class ONE_LAYER_RBF_NN(nn.Module):
     print("train loss for min test loss: ", loss_vals[np.argmin(test_loss)])
     print("final test loss: ", test_loss[-1])
 
-"FUNCTION FOR RADIAL BASIS FUNCTION NEURAL NETWORK SOLVED USING LEAST SQUARES METHOD"
+"FUNCTION FOR RADIAL BASIS FUNCTION NEURAL NETWORK SOLVED USING LEAST SQUARES METHOD - AN ALTERNATIVE APPROACH"
 
 def RBF_LS4(x, y, sc, train_size, dev_size, test_size):
   
