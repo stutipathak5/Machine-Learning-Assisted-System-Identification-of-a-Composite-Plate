@@ -2,6 +2,7 @@
 
 from smt.sampling_methods import LHS
 import numpy as np
+import finite_element_analysis
 
 Lx=0.5 
 Ly=0.5 
