@@ -4,6 +4,7 @@ def FEM(E1,E2,nu12,G12,rho,Lx,Ly,h,D):
 
   import numpy as np
   from scipy.linalg import eig
+  import newmark_intg
           
   Nx = 4
   Ny = 4 
