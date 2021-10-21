@@ -1,8 +1,8 @@
 "SMT FUNCTION FOR LHS"
 
 from smt.sampling_methods import LHS
-import numpy as np
-import finite_element_analysis
+import numpy as np 
+exec(open("finite_element_analysis.py").read())
 
 Lx=0.5 
 Ly=0.5 
