@@ -2,6 +2,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.cluster import KMeans
 from sklearn.neighbors import NearestNeighbors
 import time
+exec(open("rbf_and_mlp_models.py").read())
 
 dat = 2000
 total = 1950
@@ -60,7 +61,7 @@ print("ACTUAL VALUES")
 act1 = scaler1.inverse_transform(np.expand_dims(output[total:total+error_size], axis=1)).T
 print(act1[:,0:20])
 
-print("PREDICTED VALUES OF TWO LAYER RBF")
+print("PREDICTED VALUES OF ONE LAYER RBF")
 y_pred1 = rbf1(torch.from_numpy(inputFD[total:total+error_size,:].astype(np.float32)))
 Y_pred1 = scaler1.inverse_transform(y_pred1.detach().numpy()).T
 print(Y_pred1[:,0:10])
@@ -84,7 +85,7 @@ print("ACTUAL VALUES")
 act1 = scaler1.inverse_transform(np.expand_dims(output[total:total+error_size], axis=1)).T
 print(act1[:,0:20])
 
-print("PREDICTED VALUES OF THREE LAYER MLP")
+print("PREDICTED VALUES OF TWO LAYER MLP")
 y_pred4 = mlp2(torch.from_numpy(inputFD[total:total+error_size,:].astype(np.float32)))
 Y_pred4 = scaler1.inverse_transform(y_pred4.detach().numpy()).T
 print(Y_pred4[:,0:20])
