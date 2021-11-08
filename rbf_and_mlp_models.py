@@ -28,10 +28,10 @@ class RBF_CLUST(nn.Module):
     def __init__(self, in_features, out_features, basis_func):
     
         super().__init__()
-        self.in_features = in_features                                         
-        self.out_features = out_features                                      
-        self.centres = torch.from_numpy(c.astype(np.float32))
-        self.sigmas = torch.from_numpy(r.astype(np.float32))
+        self.in_features = in_features                                                      # in_features is no. of features in one training sample                      
+        self.out_features = out_features                                                    # out_features is no. of hidden layer neurons or no. of RBF neurons
+        self.centres = torch.from_numpy(c.astype(np.float32))                               # each row of centers is one RBF neuron center
+        self.sigmas = torch.from_numpy(r.astype(np.float32))                                # each elemeant of sigmas is each RBF neuron spread
         self.basis_func = basis_func
 
 
@@ -42,7 +42,7 @@ class RBF_CLUST(nn.Module):
         c = self.centres.unsqueeze(0).expand(size)                                  
         distances = (x - c).pow(2).sum(-1).pow(0.5) * self.sigmas.unsqueeze(0).pow(-1)  
         
-        return self.basis_func(distances) 
+        return self.basis_func(distances)                                                   # computing the output of RBF layer
 
 "DEFINING RBF FUNCTIONS"
 
@@ -72,8 +72,8 @@ class ONE_LAYER_RBF_NN(nn.Module):
     self.no_RBF_neurons = no_RBF_neurons
     self.no_in_features = no_in_features
     self.RBF_function = RBF_function
-    self.RBF = RBF_CLUST(no_in_features, no_RBF_neurons, RBF_function)
-    self.Linear = nn.Linear(no_RBF_neurons, 1)
+    self.RBF = RBF_CLUST(no_in_features, no_RBF_neurons, RBF_function)                       # RBF gives output of RBF layer
+    self.Linear = nn.Linear(no_RBF_neurons, 1)                                               # Linear gives final output
 
   def forward(self, x):
     x = self.RBF(x)
@@ -82,9 +82,9 @@ class ONE_LAYER_RBF_NN(nn.Module):
   def fit(self, x, y, epochs, batch_size, lr, loss_func, train_size, test_size):
 
     self.train()
-    trainset, testset = torch.utils.data.random_split(MyDataset(x, y), (train_size, test_size))
-    trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-    testloader = DataLoader(testset, batch_size=test_size, shuffle=False)
+    trainset, testset = torch.utils.data.random_split(MyDataset(x, y), (train_size, test_size))                     
+    trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)                         # trainloader contains training data
+    testloader = DataLoader(testset, batch_size=test_size, shuffle=False)                           # testloader contains testing data
     
     optimiser = torch.optim.Adam(self.parameters(), lr=lr)
     epoch = 0
