@@ -10,9 +10,9 @@ train = 1700
 test = 250
 pr = 3
 
-inputFD = np.load('/content/drive/MyDrive/FEM/LHS(' + str(dat) + ')_inputFD.npy')
-# inputTD = np.load('/content/drive/MyDrive/FEM/LHS(' + str(dat) + ')_inputTD.npy')
-output = np.load('/content/drive/MyDrive/FEM/LHS(' + str(dat) + ')_output.npy')
+inputFD = np.load('/content/drive/MyDrive/FEM/LHS(' + str(dat) + ')_inputFD.npy')              # inputFD is frequency domain response
+# inputTD = np.load('/content/drive/MyDrive/FEM/LHS(' + str(dat) + ')_inputTD.npy')            # inputTD is time domain response
+output = np.load('/content/drive/MyDrive/FEM/LHS(' + str(dat) + ')_output.npy')                # output is four parameters
 
 "SCALING DATA"
 
@@ -22,7 +22,7 @@ scaler = MinMaxScaler((-1, 1))
 
 inputFD = scaler.fit_transform(inputFD)
 # inputTD = scaler.fit_transform(inputTD)
-output = np.squeeze(scaler1.fit_transform(np.expand_dims(output[:, pr], axis=1)), axis=1)
+output = np.squeeze(scaler1.fit_transform(np.expand_dims(output[:, pr], axis=1)), axis=1)      # output changed to just one parameter
 
 "CREATING TENSORS"
 
@@ -31,14 +31,12 @@ output = np.squeeze(scaler1.fit_transform(np.expand_dims(output[:, pr], axis=1))
 X_FD = torch.from_numpy(inputFD[0:dat, :].astype(np.float32))
 y_FD = torch.from_numpy(output[0:dat].astype(np.float32))
 
-"TRAINING WITH JUST FD RESPONSE"
+"K-MEANS CLUSTERING FOR CENTROID DETERMINATION"
 
-print("ONE LAYER RBF")
-
-n_clusters=300
+n_clusters=300                                                                    
 n_neighbors=4
 kmeans = KMeans(n_clusters, random_state=0).fit(inputFD[0:train,:])
-c=kmeans.cluster_centers_
+c=kmeans.cluster_centers_                                                                      # c are centroids
 nbrs = NearestNeighbors(n_neighbors+1, algorithm='ball_tree').fit(kmeans.cluster_centers_)
 distances, indices = nbrs.kneighbors(c)
 distances=np.delete(distances, 0, 1)
@@ -47,7 +45,11 @@ x=np.zeros((n_clusters))
 for i in range(n_clusters):
   for j in range(n_neighbors):
     x[i]+=(distances[i][j])**2
-r=np.sqrt(x/(n_neighbors))
+r=np.sqrt(x/(n_neighbors))                                                                     # r are spreads
+
+"TRAINING WITH JUST FD RESPONSE"
+
+print("ONE LAYER RBF")
 
 rbf1 = ONE_LAYER_RBF_NN(n_clusters, 27, gaussian)
 tic = time.time()
@@ -65,7 +67,7 @@ print("PREDICTED VALUES OF ONE LAYER RBF")
 y_pred1 = rbf1(torch.from_numpy(inputFD[total:total+error_size,:].astype(np.float32)))
 Y_pred1 = scaler1.inverse_transform(y_pred1.detach().numpy()).T
 print(Y_pred1[:,0:10])
-rmse_1 = np.sqrt(np.sum((act1-Y_pred1).squeeze(0)**2))/error_size
+rmse_1 = np.sqrt(np.sum((act1-Y_pred1).squeeze(0)**2))/error_size                                         
 print("rmse error",rmse_1)
 perct_1 = (np.sum(abs((act1-Y_pred1)/act1)))*(100/(np.shape(act1)[1]))
 print("prcnt error", perct_1)
