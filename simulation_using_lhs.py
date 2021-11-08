@@ -4,12 +4,12 @@ from smt.sampling_methods import LHS
 import numpy as np 
 exec(open("finite_element_analysis.py").read())
 
-Lx=0.5 
-Ly=0.5 
-h=0.005
-rho=1846
+Lx=0.5                                                                                    # Lx is length
+Ly=0.5                                                                                    # Ly is width
+h=0.005                                                                                   # h is height
+rho=1846                                                                                  # rho is density
 no_sam=300000
-lim=np.array([[50*10**9, 150*10**9], [5*10**9, 10*10**9],[0.25,0.45],[2*10**9,8*10**9]])
+lim=np.array([[50*10**9, 150*10**9], [5*10**9, 10*10**9],[0.25,0.45],[2*10**9,8*10**9]])          # lim are minimum and maximum parameter values
 sam=LHS(xlimits=lim)
 output=sam(no_sam)
 inputTD=np.zeros((no_sam,6001))
@@ -21,8 +21,8 @@ for i in range(no_sam):
   E2=output[i][1]
   nu12=output[i][2]
   G12=output[i][3]
-  iFD=FEM(E1,E2,nu12,G12,rho,Lx,Ly,h,'FD')
-  iTD=FEM(E1,E2,nu12,G12,rho,Lx,Ly,h,'TD')
+  iFD=FEM(E1,E2,nu12,G12,rho,Lx,Ly,h,'FD')                                                        # iFD is frequency domain response for each sample
+  iTD=FEM(E1,E2,nu12,G12,rho,Lx,Ly,h,'TD')                                                        # iTD is time domain response for each sample
   inputTD[i,:]=iTD
   inputFD[i,:]=iFD
 
