@@ -31,7 +31,7 @@ class RBF_CLUST(nn.Module):
         self.in_features = in_features                                                      # in_features is no. of features in one training sample                      
         self.out_features = out_features                                                    # out_features is no. of hidden layer neurons or no. of RBF neurons
         self.centres = torch.from_numpy(c.astype(np.float32))                               # each row of centers is one RBF neuron center
-        self.sigmas = torch.from_numpy(r.astype(np.float32))                                # each elemeant of sigmas is each RBF neuron spread
+        self.sigmas = torch.from_numpy(r.astype(np.float32))                                # each element of sigmas is each RBF neuron spread
         self.basis_func = basis_func
 
 
@@ -99,17 +99,17 @@ class ONE_LAYER_RBF_NN(nn.Module):
       for x_batch, y_batch in trainloader:
         batches += 1
         optimiser.zero_grad()
-        y_hat = self.forward(x_batch)
+        y_hat = self.forward(x_batch)                                                               # y_hat is output of one batch and x_batch is input of one batch
         loss = loss_func(y_hat, y_batch.unsqueeze(1))
         loss.backward()
         optimiser.step()
-        epoch_loss.append(loss.item())
+        epoch_loss.append(loss.item())                                                              # epoch_loss is loss for one batch for one epoch
         
-      loss_vals.append(sum(epoch_loss) / len(epoch_loss))
+      loss_vals.append(sum(epoch_loss) / len(epoch_loss))                                           # loss_vals is average loss for all batches for one epoch
       with torch.no_grad():
         for x_test, y_test in testloader:
           epoch_test_loss = loss_func(self.forward(x_test), y_test.unsqueeze(1))
-          test_loss.append(epoch_test_loss.item())
+          test_loss.append(epoch_test_loss.item())                                                   
 
     plt.figure(figsize=(8, 5))
     plt.xlabel('Number of epochs', fontsize=20)
@@ -133,28 +133,28 @@ class ONE_LAYER_RBF_NN(nn.Module):
 
 def RBF_LS4(x, y, sc, train_size, dev_size, test_size):
   
-  xtr = x[0:train_size,:]
-  ytr = y[0:train_size,:]
-  xdev = x[train_size:train_size+dev_size,:]
-  ydev = y[train_size:train_size+dev_size,:]
-  xte = x[train_size+dev_size:train_size+dev_size+test_size,:]
-  yte = y[train_size+dev_size:train_size+dev_size+test_size,:]
+  xtr = x[0:train_size,:]                                                                           # xtr is training input
+  ytr = y[0:train_size,:]                                                                           # ytr is training output
+  xdev = x[train_size:train_size+dev_size,:]                                                        # xdev is development input
+  ydev = y[train_size:train_size+dev_size,:]                                                        # ydev is devlopment output
+  xte = x[train_size+dev_size:train_size+dev_size+test_size,:]                                      # xte is testing input
+  yte = y[train_size+dev_size:train_size+dev_size+test_size,:]                                      # yte is testing output
   
-  no_tr_sam, in_features= xtr.size()
+  no_tr_sam, in_features= xtr.size()                                                                # in_features is no. of features in one training sample  
   no_dev_sam = xdev.size()[0]
   no_te_sam = xte.size()[0]
   
   size1 = (no_tr_sam, no_tr_sam, in_features)         
   x1 = xtr.unsqueeze(1).expand(size1)                                
-  c1 = xtr.unsqueeze(0).expand(size1)
-  s = (sc/np.sqrt(-np.log(0.5)))*torch.ones(no_tr_sam)                                
+  c1 = xtr.unsqueeze(0).expand(size1)                                                               
+  s = (sc/np.sqrt(-np.log(0.5)))*torch.ones(no_tr_sam)                                              # s is spreads                        
   z1 = (x1 - c1).pow(2).sum(-1).pow(0.5)*s.unsqueeze(0).pow(-1)
   a1 = gaussian(z1)
-  w, _ = torch.lstsq(ytr,torch.cat((a1,\
+  w, _ = torch.lstsq(ytr,torch.cat((a1,\                                                            # w is calculated weights
          torch.ones((no_tr_sam,1))), 1))
          
   tr_pred = torch.matmul(torch.cat((a1,\
-            torch.ones((no_tr_sam,1))), 1),w)
+            torch.ones((no_tr_sam,1))), 1),w)                                                       # tr_pred is predicted training output
   rmse_tr = torch.sqrt(sum((ytr-tr_pred.squeeze(1))**2))/no_tr_sam
   
   size2 = (no_dev_sam, no_tr_sam, in_features) 
@@ -163,7 +163,7 @@ def RBF_LS4(x, y, sc, train_size, dev_size, test_size):
   z2 = (x2 - c2).pow(2).sum(-1).pow(0.5)*s.unsqueeze(0).pow(-1)
   a2 = gaussian(z2)
   
-  dev_pred = torch.matmul(torch.cat((a2,\
+  dev_pred = torch.matmul(torch.cat((a2,\                                                           # dev_pred is predicted development output
             torch.ones((no_dev_sam,1))), 1),w)
   rmse_dev = torch.sqrt(sum((ydev-dev_pred.squeeze(1))**2))/no_dev_sam
   
@@ -173,7 +173,7 @@ def RBF_LS4(x, y, sc, train_size, dev_size, test_size):
   z3 = (x3 - c3).pow(2).sum(-1).pow(0.5)*s.unsqueeze(0).pow(-1)
   a3 = gaussian(z3)
   
-  te_pred = torch.matmul(torch.cat((a3,\
+  te_pred = torch.matmul(torch.cat((a3,\                                                             # te_pred is predicted testing output
             torch.ones((no_te_sam,1))), 1),w)
             
   return te_pred, rmse_tr, rmse_dev
@@ -185,14 +185,14 @@ class TWO_LAYER_MLP(nn.Module):
     def __init__(self, input_size, hidden_size, hidden_size1):
     
             super().__init__()
-            self.input_size = input_size
-            self.hidden_size  = hidden_size
-            self.hidden_size1  = hidden_size1
+            self.input_size = input_size                                                            # input_size is no. of features in one training sample     
+            self.hidden_size  = hidden_size                                                         # hidden_size is number of neurons in first layer of network
+            self.hidden_size1  = hidden_size1                                                       # hidden_size1 is number of neurons in second layer of network
             self.fc1 = nn.Linear(self.input_size, self.hidden_size)
-            self.relu = nn.ReLU()
+            self.relu = nn.ReLU()                                                                   # relu gives output of first layer of network
             self.fc2 = nn.Linear(self.hidden_size, self.hidden_size1)
-            self.relu1 = nn.ReLU()
-            self.fc3 = nn.Linear(self.hidden_size1, 1)
+            self.relu1 = nn.ReLU()                                                                  # relu1 gives output of second layer of network
+            self.fc3 = nn.Linear(self.hidden_size1, 1)                                              # fc3 gives output of network
 
     def forward(self, x):
       
@@ -207,8 +207,8 @@ class TWO_LAYER_MLP(nn.Module):
       
         self.train()
         trainset, testset = torch.utils.data.random_split(MyDataset(x, y), (train_size, test_size))
-        trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-        testloader = DataLoader(testset, batch_size = test_size, shuffle = False)
+        trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)                        # trainloader contains training data
+        testloader = DataLoader(testset, batch_size = test_size, shuffle = False)                      # testloader contains testing data
         
         optimiser = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=1e-5)
         epoch = 0
@@ -223,13 +223,13 @@ class TWO_LAYER_MLP(nn.Module):
             for x_batch, y_batch in trainloader:
                 batches += 1
                 optimiser.zero_grad()
-                y_hat = self.forward(x_batch)
+                y_hat = self.forward(x_batch)                                                      # y_hat is output of one batch and x_batch is input of one batch
                 loss = loss_func(y_hat, y_batch.unsqueeze(1))
                 loss.backward()
                 optimiser.step()
-                epoch_loss.append(loss.item())
+                epoch_loss.append(loss.item())                                                     # epoch_loss is loss for one batch for one epoch
                 
-            loss_vals.append(sum(epoch_loss)/len(epoch_loss))   
+            loss_vals.append(sum(epoch_loss)/len(epoch_loss))                                      # loss_vals is average loss for all batches for one epoch
             with torch.no_grad():
                 for x_test, y_test in testloader:
                     epoch_test_loss = loss_func(self.forward(x_test), y_test.unsqueeze(1))
